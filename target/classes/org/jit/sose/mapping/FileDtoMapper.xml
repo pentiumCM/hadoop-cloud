@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jit.sose.mapper.FileDtoMapper">
+  <resultMap id="BaseResultMap" type="org.jit.sose.dto.FileDto">
+    <id column="fileNewName" jdbcType="VARCHAR" property="filenewname" />
+    <result column="fileOwner" jdbcType="VARCHAR" property="fileowner" />
+    <result column="filelocalurl" jdbcType="VARCHAR" property="filelocalurl" />
+    <result column="filetime" jdbcType="VARCHAR" property="filetime" />
+    <result column="fileOriginalName" jdbcType="VARCHAR" property="fileoriginalname" />
+    <result column="filestatus" jdbcType="VARCHAR" property="filestatus" />
+    <result column="filehdfsurl" jdbcType="VARCHAR" property="filehdfsurl" />
+  </resultMap>
+
+
+  <sql id="Base_Column_List">
+    fileNewName, fileOwner, filelocalurl, filetime, fileOriginalName, filestatus,filehdfsurl
+  </sql>
+
+<!--按用户名和文件新名称查找所有状态的的文件-->
+<select id="queryPersonAll" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from file
+    where fileNewName = #{fileNewName,jdbcType=VARCHAR}
+    AND fileOwner = #{fileOwner,jdbcType=VARCHAR}
+    ORDER BY filetime DESC
+</select>
+
+
+  <!--按用户名和文件原名查找状态为（“X”）存在的文件-->
+  <select id="selectByFileOriginalName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+      from file
+      where fileOriginalName = #{fileoriginalname,jdbcType=VARCHAR}
+        AND fileOwner = #{fileOwner,jdbcType=VARCHAR}
+        AND fileStatus = #{filestatus,jdbcType=VARCHAR}
+          ORDER BY filetime DESC
+  </select>
+
+
+  <!--按用户名查找某状态的文件-->
+  <select id="selectByfilestatus" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from file
+    where  fileOwner = #{username,jdbcType=VARCHAR}
+    AND fileStatus = #{filestatus,jdbcType=VARCHAR}
+    ORDER BY filetime DESC
+  </select>
+
+
+
+  <!--按用户名和文件在服务器上的新名查找状态为存在的文件-->
+  <select id="selectByFileNewName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from file
+    where fileNewName = #{fileNewName,jdbcType=VARCHAR}
+          AND fileOwner = #{fileOwner,jdbcType=VARCHAR}
+            AND fileStatus = #{filestatus,jdbcType=VARCHAR}
+    ORDER BY filetime DESC
+  </select>
+
+  <!--按用户名查找所有"某种状态"为的文件-->
+  <select id="selectByPerson" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from file
+    where fileOwner = #{fileOwner,jdbcType=VARCHAR}
+          AND fileStatus = #{filestatus,jdbcType=VARCHAR}
+  </select>
+
+  <!--按文件在服务器上新名称删除文件,将文件状态修改为：X-->
+  <update id="deleteByFileName" parameterType="java.lang.String">
+    update file set fileStatus = #{filestatus,jdbcType=VARCHAR}
+    where fileNewName = #{fileNewName,jdbcType=VARCHAR}
+          AND fileOwner = #{fileOwner,jdbcType=VARCHAR}
+  </update>
+
+  <!--插入文件信息-->
+  <insert id="insert" parameterType="org.jit.sose.dto.FileDto">
+    insert into file (fileNewName, fileOwner, filelocalurl, 
+      filetime, fileOriginalName,fileStatus,filehdfsurl)
+    values (#{filenewname,jdbcType=VARCHAR}, #{fileowner,jdbcType=VARCHAR}, #{filelocalurl,jdbcType=VARCHAR}, 
+      #{filetime,jdbcType=VARCHAR}, #{fileoriginalname,jdbcType=VARCHAR},#{filestatus,jdbcType=VARCHAR},#{filehdfsurl,jdbcType=VARCHAR})
+  </insert>
+
+
+</mapper>
